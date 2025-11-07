@@ -1,0 +1,2 @@
+mpcrl==1.4.1
+git+https://github.com/SamuelMallick/distributed-mpc-reinforcement-learning.git@second_order_update_frozen
