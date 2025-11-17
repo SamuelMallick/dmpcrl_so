@@ -26,7 +26,7 @@ cent_flag = False
 
 plot = True
 save = True
-sim_len = 1001
+sim_len = 2001
 
 n = 3
 N = 10
@@ -78,13 +78,13 @@ agents = [
             mpcs[i],
             update_strategy=1,
             discount_factor=gamma,
-            # optimizer=GradientDescent(learning_rate=1e-6),
-            optimizer=DistributedSecondOrderOptimizer(
-                learning_rate=ExponentialScheduler(1e-4, factor=1)
-            ),
+            optimizer=GradientDescent(learning_rate=1e-8),
+            # optimizer=DistributedSecondOrderOptimizer(
+            #     learning_rate=ExponentialScheduler(1e-4, factor=1)
+            # ),
             learnable_parameters=learnable_parameters[i],
             fixed_parameters=fixed_parameters[i],
-            hessian_type="approx",
+            hessian_type="none",
             record_td_errors=True,
             experience=ExperienceReplay(
                 maxlen=100, sample_size=15, include_latest=10, seed=1
@@ -125,9 +125,9 @@ agent = Log(  # type: ignore[var-annotated]
             centralized_optimizer=CentralizedSecondOrderOptimizer(
                 learning_rate=ExponentialScheduler(1e-4, factor=1)
             ),
-            # centralized_optimizer=GradientDescent(learning_rate=1e-5),
+            # centralized_optimizer=GradientDescent(1e-8),
             centralized_exploration=EpsilonGreedyExploration(
-                epsilon=ExponentialScheduler(0, factor=0.997),
+                epsilon=ExponentialScheduler(0, factor=0.99),
                 strength=0.5 * (2),
                 seed=1,
             ),
@@ -141,7 +141,7 @@ agent = Log(  # type: ignore[var-annotated]
     log_frequencies={"on_timestep_end": 1},
 )
 
-agent.train(env=env, episodes=1, seed=1, save_frequency=100, save_name="cent")
+agent.train(env=env, episodes=1, seed=5, save_frequency=1000, save_name="dist_fo_seed_5")
 # agent.evaluate(env=env, episodes=1, seed=1)
 
 # Plotting the results
