@@ -23,6 +23,7 @@ from optimizers import (CentralizedSecondOrderOptimizer,
                         DistributedSecondOrderOptimizer)
 
 cent_flag = False
+second_order = True
 
 plot = True
 save = True
@@ -78,13 +79,12 @@ agents = [
             mpcs[i],
             update_strategy=1,
             discount_factor=gamma,
-            optimizer=GradientDescent(learning_rate=1e-8),
-            # optimizer=DistributedSecondOrderOptimizer(
-            #     learning_rate=ExponentialScheduler(1e-4, factor=1)
-            # ),
+            optimizer=DistributedSecondOrderOptimizer(
+                learning_rate=ExponentialScheduler(1e-4, factor=1)
+            ) if second_order else GradientDescent(learning_rate=1e-8),
             learnable_parameters=learnable_parameters[i],
             fixed_parameters=fixed_parameters[i],
-            hessian_type="none",
+            hessian_type="approx" if second_order else "none",
             record_td_errors=True,
             experience=ExperienceReplay(
                 maxlen=100, sample_size=15, include_latest=10, seed=1
@@ -115,7 +115,7 @@ agent = Log(  # type: ignore[var-annotated]
             admm_iters=admm_iters,
             consensus_iters=consensus_iters,
             centralized_mpc=mpc,
-            hessian_type="approx",
+            hessian_type="approx" if second_order else "none",
             centralized_flag=cent_flag,
             centralized_debug=False,
             centralized_learnable_parameters=cent_learnable_parameters,
@@ -124,8 +124,7 @@ agent = Log(  # type: ignore[var-annotated]
             centralized_discount_factor=gamma,
             centralized_optimizer=CentralizedSecondOrderOptimizer(
                 learning_rate=ExponentialScheduler(1e-4, factor=1)
-            ),
-            # centralized_optimizer=GradientDescent(1e-8),
+            ) if second_order else GradientDescent(learning_rate=1e-8),
             centralized_exploration=EpsilonGreedyExploration(
                 epsilon=ExponentialScheduler(0, factor=0.99),
                 strength=0.5 * (2),
