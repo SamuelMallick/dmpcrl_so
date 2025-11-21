@@ -7,10 +7,13 @@ import numpy as np
 from csnlp.wrappers import Mpc
 from dmpcrl.core.admm import AdmmCoordinator
 from gymnasium.wrappers import TimeLimit
-from mpcrl import (ExperienceReplay, LearnableParameter,
-                   LearnableParametersDict, UpdateStrategy)
-from mpcrl.core.exploration import (EpsilonGreedyExploration,
-                                    StepWiseExploration)
+from mpcrl import (
+    ExperienceReplay,
+    LearnableParameter,
+    LearnableParametersDict,
+    UpdateStrategy,
+)
+from mpcrl.core.exploration import EpsilonGreedyExploration, StepWiseExploration
 from mpcrl.core.schedulers import ExponentialScheduler
 from mpcrl.optim import GradientDescent
 from mpcrl.wrappers.agents import Log, RecordUpdates
@@ -19,8 +22,7 @@ from mpcrl.wrappers.envs import MonitorEpisodes
 from agent import Coordinator, LocalAgent
 from env import LtiNetwork
 from mpc import GlobalLearningMpc, LocalLearningMpc
-from optimizers import (CentralizedSecondOrderOptimizer,
-                        DistributedSecondOrderOptimizer)
+from optimizers import CentralizedSecondOrderOptimizer, DistributedSecondOrderOptimizer
 
 cent_flag = False
 second_order = True
@@ -79,9 +81,13 @@ agents = [
             mpcs[i],
             update_strategy=1,
             discount_factor=gamma,
-            optimizer=DistributedSecondOrderOptimizer(
-                learning_rate=ExponentialScheduler(1e-4, factor=1)
-            ) if second_order else GradientDescent(learning_rate=1e-8),
+            optimizer=(
+                DistributedSecondOrderOptimizer(
+                    learning_rate=ExponentialScheduler(1e-4, factor=1)
+                )
+                if second_order
+                else GradientDescent(learning_rate=1e-8)
+            ),
             learnable_parameters=learnable_parameters[i],
             fixed_parameters=fixed_parameters[i],
             hessian_type="approx" if second_order else "none",
@@ -122,9 +128,13 @@ agent = Log(  # type: ignore[var-annotated]
             centralized_fixed_parameters={},
             centralized_update_strategy=UpdateStrategy(1, hook="on_timestep_end"),
             centralized_discount_factor=gamma,
-            centralized_optimizer=CentralizedSecondOrderOptimizer(
-                learning_rate=ExponentialScheduler(1e-4, factor=1)
-            ) if second_order else GradientDescent(learning_rate=1e-8),
+            centralized_optimizer=(
+                CentralizedSecondOrderOptimizer(
+                    learning_rate=ExponentialScheduler(1e-4, factor=1)
+                )
+                if second_order
+                else GradientDescent(learning_rate=1e-8)
+            ),
             centralized_exploration=EpsilonGreedyExploration(
                 epsilon=ExponentialScheduler(0, factor=0.99),
                 strength=0.5 * (2),
@@ -140,7 +150,9 @@ agent = Log(  # type: ignore[var-annotated]
     log_frequencies={"on_timestep_end": 1},
 )
 
-agent.train(env=env, episodes=1, seed=5, save_frequency=1000, save_name="dist_fo_seed_5")
+agent.train(
+    env=env, episodes=1, seed=5, save_frequency=1000, save_name="dist_fo_seed_5"
+)
 # agent.evaluate(env=env, episodes=1, seed=1)
 
 # Plotting the results
